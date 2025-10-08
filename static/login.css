@@ -40,3 +40,7 @@ button:hover {
 a {
     color: #0320fc;
 }
+
+a:hover {
+    color: #0320a5;
+}
