@@ -1,5 +1,5 @@
 body {
-    background-color: #F0FFFF;
+    background-color: #F0FFFF; 
 }
 
 
@@ -22,7 +22,7 @@ fieldset {
 img {
     max-width: 100%;
     max-height: 100%;
-    height: auto;
+    min-height: auto;
 }
 
 button {

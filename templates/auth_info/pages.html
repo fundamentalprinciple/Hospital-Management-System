@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
+    <title>{{ page_name }}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
-    <link rel="stylesheet" href="../../static/login.css">
+    <link rel="stylesheet" href="../../static/about.css">
     
 </head>
 <body>
+    <header>
 
-    <div class="navbar navbar-light navbar-expand-md">
+    <div class="navbar navbar-dark navbar-expand-md">
         
         <div class="container">
             
-            <a href="#" class="navbar-brand">Hospital Management System</a>
+            <a href="/" class="navbar-brand">Hospital Management System</a>
            
 
             <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-label="Expand Navigation">
@@ -27,13 +28,13 @@
             <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav ms-auto"> 
                 <li class="nav-item">
-                    <a href="#" class="nav-link active">Login</a>
+                    <a href="login" id="login_nav" class="nav-link {{ log_active }}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">Help</a>
+                    <a href="help" id="help_nav" class="nav-link {{ help_active }}">Help</a>
                 </li>
                  <li class="nav-item">
-                    <a href="#" class="nav-link">About</a>
+                     <a href="about" id="about_nav" class="nav-link {{ about_active }}">About</a>
                 </li>
             </ul>
             </div>
@@ -41,9 +42,31 @@
         </div>
 
     </div>
+    </header>
 
-    <div class="container">
-    </div>
+    <main>
+        {{ main | safe }}
+
+    </main>
+
+    <!--
+    <footer class="mt-auto"> FOOTER INFORMATION </footer>
+    -->
+    <script>
+        {{ script }}    
+
+        /*
+        title = document.getElementByName("title").value
+        console.log(title);
+        if (title=="Login" || title=="Register") {
+            document.getElementById("login_nav").classList.add("active");
+        } elif (title=="Help") {
+            document.getElementById("help_nav").classList.add("active");
+        } elif (title=="about") {
+            document.getElementById("about_nav").classList.add("active");
+        }
+*/
+    </script>
 
 </body>
 </html>
