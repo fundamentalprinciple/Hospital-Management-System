@@ -2,7 +2,32 @@ from flask import Flask
 from flask import render_template
 from flask import request
 
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
+
+class Base(DeclarativeBase):
+    pass
+
+db = SQLAlchemy(model_class=Base)
+
 app=Flask(__name__)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite3:///database.db"
+
+db.init_app(app)
+
+#MODELS
+
+with app.app_context():
+    db.reflect()
+
+
+
+
+
+
+
+#CONTROLLERS
 
 login_main='''
             
@@ -123,7 +148,7 @@ def help():
 
 @app.route("/about")
 def about():
-    return render_template('auth_info/pages.html', page_name="about", main="A PROJECT WEB APP FOR HOSPITAL MANAGEEMENT, IIT MADRAS", about_active="active")
+    return render_template('auth_info/pages.html', page_name="about", main="A PROJECT WEB APP FOR HOSPITAL MANAGEMENT, IIT MADRAS", about_active="active")
 
 
 if __name__=="__main__":
