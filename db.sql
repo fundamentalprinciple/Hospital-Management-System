@@ -25,7 +25,7 @@ CREATE TABLE doctors(
 );
 
 CREATE TABLE patients(
-    patient_id VARCHAR(255) PRIMARY KEY NOT NULL,
+    patient_id INTEGER PRIMARY KEY NOT NULL,
     username VARCHAR(255) NOT NULL,
     fullname VARCHAR(255) NOT NULL,
     FOREIGN KEY (username) REFERENCES roles(username)
