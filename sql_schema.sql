@@ -1,5 +1,5 @@
 CREATE TABLE roles(
-    username VARCHAR(255) PRIMARY KEY NOT NULL,
+    username VARCHAR(255) PRIMARY KEY,
     
     --not secure, consider hashing later on 
     password VARCHAR(255) NOT NULL,
