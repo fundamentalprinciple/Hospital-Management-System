@@ -4,6 +4,9 @@ from application import config
 from application.config import LocalDevelopmentConfig
 from application.database import db
 
+from flask_security import Security, SQLAlchemySessionUserDatastore, SQLAlchemyUserDatastore
+from application.models import User, Role
+
 app = None
 
 def create_app():
@@ -15,9 +18,14 @@ def create_app():
         app.config.from_object(LocalDevelopmentConfig)
     db.init_app(app)
     app.app_context().push()
+    
+    user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
+    security = Security(app, user_datastore)
+
     return app
 
 app = create_app()
+
 
 from application.controllers import *
 

@@ -20,4 +20,6 @@ def help():
 def about():
     return render_template('auth_info/pages.html', page_name="about", main="A PROJECT WEB APP FOR HOSPITAL MANAGEMENT, IIT MADRAS", about_active="active")
 
-
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
