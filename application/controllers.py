@@ -6,6 +6,9 @@ from .temp import *
 @app.route("/")
 @app.route("/login")
 def login():
+
+
+
     return render_template('auth_info/pages.html', page_name="Login",main=login_main, log_active="active")
 
 @app.route("/register")

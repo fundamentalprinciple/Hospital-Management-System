@@ -16,7 +16,12 @@ def create_app():
     else:
         print("Starting Local Development")
         app.config.from_object(LocalDevelopmentConfig)
+    
     db.init_app(app)
+
+    with app.app_context():
+        db.create_all()    
+
     app.app_context().push()
     
     user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
