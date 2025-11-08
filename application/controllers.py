@@ -3,8 +3,8 @@ from flask import current_app as app
 from application.models import Role, User
 from .temp import *
 
-@app.route("/")
-@app.route("/login")
+@app.route("/", methods=["GET", "POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
 
 

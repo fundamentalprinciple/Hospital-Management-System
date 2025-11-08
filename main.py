@@ -7,7 +7,11 @@ from application.database import db
 from flask_security import Security, SQLAlchemySessionUserDatastore, SQLAlchemyUserDatastore
 from application.models import User, Role
 
+from flask_restful import Resource, Api
+
+
 app = None
+api = None
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -17,8 +21,11 @@ def create_app():
         print("Starting Local Development")
         app.config.from_object(LocalDevelopmentConfig)
     
-    db.init_app(app)
+    
+    api = Api(app)
+    
 
+    db.init_app(app)
     with app.app_context():
         db.create_all()    
 
@@ -27,12 +34,15 @@ def create_app():
     user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
     security = Security(app, user_datastore)
 
-    return app
+    return app, api
 
-app = create_app()
+app, api = create_app()
 
 
 from application.controllers import *
+
+from application.api import UserAPI
+api.add_resource(UserAPI, "/api/user/<string:username>", "/api/user")
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8000)
