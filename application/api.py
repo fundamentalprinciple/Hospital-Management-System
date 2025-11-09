@@ -39,6 +39,15 @@ class UserAPI(Resource):
         if username is None:
             raise BusinessValidationError(status_code=400, error_code='BE1001', error_message="username is required")
         
-        pass         
+        user = db.session.query(User).filter(User.username==username).first()
+
+        if user:
+            raise BusinessValidationError(status_code=400, error_code="BE1002", error_message="user already exists")
+        else:
+            new_user = User(username=username, active=1, hash='abc',fs_uniquifier=username)
+            db.session.add(new_user)
+            db.session.commit()
+            return f"{new_user}" , 201
+
 
 

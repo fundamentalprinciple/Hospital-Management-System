@@ -17,7 +17,7 @@ class User(db.Model, UserMixin):
     fs_uniquifier = db.Column(db.String, unique=True, nullable=False, default=lambda: uuid4().hex)
 
     def __repr__(self):
-        return f"User({self.user_id},{self.username},{self.role})"
+        return f"User({self.user_id},{self.username},{self.roles})"
 
 class Role(db.Model, RoleMixin):
     role = db.Column(db.String(255), primary_key=True)
