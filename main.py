@@ -29,14 +29,15 @@ def create_app():
     with app.app_context():
         db.create_all()    
 
-    app.app_context().push()
-    
-    user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
+    user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security = Security(app, user_datastore)
+
+    app.app_context().push()
 
     return app, api
 
 app, api = create_app()
+
 
 
 from application.controllers import *

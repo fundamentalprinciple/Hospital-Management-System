@@ -2,31 +2,30 @@ from flask_security import UserMixin, RoleMixin
 
 from .database import db
 
-roles_users = db.Table('roles_users',
-        db.Column('user_id', db.Integer(), db.ForeignKey('user.user_id')),
-        db.Column('role', db.Integer(), db.ForeignKey('role.role'))
-                       )
+roles_users = db.Table(
+        'roles_users',
+        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+        db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+    )
 
 class User(db.Model, UserMixin):
-    user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    __tablename__='user'
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
-    hash = db.Column(db.String(255))
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    
+    password = db.Column(db.String(255))
     active = db.Column(db.Boolean)
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
 
     fs_uniquifier = db.Column(db.String, unique=True, nullable=False, default=lambda: uuid4().hex)
 
-    def __repr__(self):
-        return f"User({self.user_id},{self.username},{self.roles})"
-
 class Role(db.Model, RoleMixin):
-    role = db.Column(db.String(255), primary_key=True)
-        
+    __tablename__='role'
+    id=db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True)
+    description = db.Column(db.String(255))
+
     __table_args__ = (
-                db.CheckConstraint('role IN ("admin", "doctor", "patient") ' , name='role_check'),
+                db.CheckConstraint('name IN ("admin", "doctor", "patient") ' , name='rolename_check'),
             )
-
-    def __repr__(self):
-        return f"Roles({self.role})"
-
-#db.create_all()

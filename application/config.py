@@ -21,7 +21,6 @@ class LocalDevelopmentConfig(Config):
     SECURITY_REGISTERABLE = True
     SECURITY_SEND_REGISTER_EMAIL = False
     SECURITY_UNAUTHORISED_VIEW = None
-
     
 class ProductionConfig(Config):
     SQLITE_DB_DIR = os.path.join(basedir, "../db_directory")
