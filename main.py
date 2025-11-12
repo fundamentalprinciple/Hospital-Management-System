@@ -4,7 +4,7 @@ from application import config
 from application.config import LocalDevelopmentConfig
 from application.database import db
 
-from flask_security import Security, SQLAlchemySessionUserDatastore, SQLAlchemyUserDatastore
+from flask_security import Security, SQLAlchemyUserDatastore
 from flask_bcrypt import Bcrypt
 
 from application.models import User, Role
@@ -30,7 +30,6 @@ def create_app():
     
     
     bcrypt = Bcrypt(app)
-
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security = Security(app, user_datastore)
     
@@ -38,13 +37,6 @@ def create_app():
         db.create_all()
 
     app.app_context().push()
-
-
-    hashed = bcrypt.generate_password_hash("pass2").decode('utf-8')
-    with app.app_context():
-        user_datastore.create_user(email="test2@x.com", password=hashed)
-        db.session.commit()
-        User.query.all()
 
     print(LocalDevelopmentConfig.SQLALCHEMY_DATABASE_URI)
     return app, api

@@ -18,10 +18,10 @@ class LocalDevelopmentConfig(Config):
     
     SECRET_KEY = '1n2j4i3ncid93nd'
     SECURITY_PASSWORD_SALT = 'sndemd3ifmrf4i94943'
-    SECUIRTY_PASSWORD_HASH = 'bcrypt'
+    SECURITY_PASSWORD_HASH = 'bcrypt'
     SECURITY_REGISTERABLE = True
     SECURITY_SEND_REGISTER_EMAIL = False
-    SECURITY_UNAUTHORISED_VIEW = None
+    SECURITY_UNAUTHORIZED_VIEW = None
 
 class ProductionConfig(Config):
     SQLITE_DB_DIR = os.path.join(basedir, "../db_directory")
