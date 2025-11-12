@@ -16,9 +16,12 @@ class LocalDevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(SQLITE_DB_DIR, "testdb.sqlite3")
     DEBUG = True
     
-    SECRET_KEY = '1n2j4i3ncid93nd'
-    SECURITY_PASSWORD_SALT = 'sndemd3ifmrf4i94943'
-    SECURITY_PASSWORD_HASH = 'bcrypt'
+    SECRET_KEY = 'pf9Wkove4IKEAXvy-cQkeDPhv9Cb3Ag-wyJILbq_dFw'
+    SECURITY_PASSWORD_SALT = '146585145368132386173505678016728509634'
+    
+    REMEMBER_COOKIE_SAMESITE = "strict"
+    SESSION_COOKIE_SAMESITE = "strict"
+
     SECURITY_REGISTERABLE = True
     SECURITY_SEND_REGISTER_EMAIL = False
     SECURITY_UNAUTHORIZED_VIEW = None

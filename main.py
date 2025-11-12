@@ -4,9 +4,7 @@ from application import config
 from application.config import LocalDevelopmentConfig
 from application.database import db
 
-from flask_security import Security, SQLAlchemyUserDatastore
-from flask_bcrypt import Bcrypt
-
+from flask_security import Security, SQLAlchemyUserDatastore, auth_required, hash_password
 from application.models import User, Role
 
 from flask_restful import Resource, Api
@@ -26,19 +24,18 @@ def create_app():
     
     api = Api(app)
     
-    db.init_app(app)
-    
-    
-    bcrypt = Bcrypt(app)
+    db.init_app(app)        
+
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security = Security(app, user_datastore)
-    
+
     with app.app_context():
         db.create_all()
+        if not security.datastore.find_user(email="test@me.com"):
+            security.datastore.create_user(email="test@me.com", password=hash_password("password"))
+            db.session.commit()
 
     app.app_context().push()
-
-    print(LocalDevelopmentConfig.SQLALCHEMY_DATABASE_URI)
     return app, api
 
 app, api = create_app()
