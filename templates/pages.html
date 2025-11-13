@@ -29,7 +29,12 @@
             <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav ms-auto"> 
                 <li class="nav-item">
-                    <a href="login" id="login_nav" class="nav-link {{ log_active }}">Login</a>
+		{% if current_user.is_authenticated %}
+		    <a href="/logout" id="logout_nav" class="nav-link">Logout</a>
+		{% else %}
+                    <a href="/login" id="login_nav" class="nav-link {{ log_active }}">Login</a>
+		{% endif %}
+
                 </li>
                 <li class="nav-item">
                     <a href="help" id="help_nav" class="nav-link {{ help_active }}">Help</a>
