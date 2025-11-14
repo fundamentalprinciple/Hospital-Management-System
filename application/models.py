@@ -25,3 +25,13 @@ class Role(db.Model, RoleMixin):
     name = db.Column(db.String(255), nullable=False, unique=True)
     description = db.Column(db.String(255))
 
+class Doctor(db.Model):
+    __tablename__='doctor'
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    specialization = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+        
+
+
+

@@ -1,0 +1,56 @@
+body {
+    background-color: #F0FFFF; 
+}
+
+
+.navbar {
+    background-color: #0077B6;
+}
+
+.legend, .navbar-brand, .nav-link {
+    font-family: "Arial";
+}
+
+fieldset {
+    color: white;
+    margin-top: 50px;
+    border-radius: 20px;
+    background-color: #0077B6;
+    padding: 50px;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+    min-height: auto;
+}
+
+button {
+    color: white;
+    background-color: #0320fc;
+    border: none;
+    height: 40px;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0320a5;
+}
+
+a {
+    color: #0320fc;
+}
+
+a:hover {
+    color: #0320a5;
+}
+
+main {
+    height: 100vh;
+}
+
+footer {
+    padding: 10px;
+    background-color: #0077B6;
+    text-align: center;
+}
