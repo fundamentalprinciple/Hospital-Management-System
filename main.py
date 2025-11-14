@@ -29,11 +29,28 @@ def create_app():
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security = Security(app, user_datastore)
 
+    
     with app.app_context():
         db.create_all()
+    '''
         if not security.datastore.find_user(email="test@me.com"):
             security.datastore.create_user(email="test@me.com", password=hash_password("password"))
             db.session.commit()
+    '''
+
+    with app.app_context():
+        roles = ['admin','doctor','patient']
+        for name in roles:
+            if not Role.query.filter_by(name=name).first():
+                db.session.add(Role(name=name))
+                db.session.commit()
+    
+        admin_user = User.query.filter_by(email='admin@admin.com').first()
+        if not admin_user:
+            admin_user = User(email='admin@admin.com', password=hash_password(os.getenv('Admin')), active=True, fs_uniquifier='')
+            db.session.add(admin_user)
+            db.session.commit()
+
 
     app.app_context().push()
     return app, api
