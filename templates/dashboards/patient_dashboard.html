@@ -51,10 +51,10 @@
     </header>
 
     <main>
-        {{ main | safe }}
-
-	{{ user }}
-
+        <div class="container mt-4">
+            <h1>Patient Dashboard</h1>
+            <p>Welcome, {{ patient_name }}!</p>
+        </div>       
     </main>
 
     <!--
@@ -62,18 +62,6 @@
     -->
     <script>
         {{ script }}    
-
-        /*
-        title = document.getElementByName("title").value
-        console.log(title);
-        if (title=="Login" || title=="Register") {
-            document.getElementById("login_nav").classList.add("active");
-        } elif (title=="Help") {
-            document.getElementById("help_nav").classList.add("active");
-        } elif (title=="about") {
-            document.getElementById("about_nav").classList.add("active");
-        }
-*/
     </script>
 
 </body>

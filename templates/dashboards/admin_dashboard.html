@@ -132,7 +132,25 @@
                             <div class="card shadow-sm">
                                 <div class="card-header">Patient Profiles</div>
                                 <div class="card-body">
-                                    <p class="text-muted mb-0">Patient profiles will appear here.</p>
+                                    <div id="patientProfiles" class="list-group">
+                                        {% if patients and patients|length > 0 %}
+                                            {% for pat in patients %}
+                                            <div class="list-group-item mb-2 shadow-sm d-flex align-items-center justify-content-between" data-patient-id="{{ pat.id }}">
+                                                <div>
+                                                    <h5 class="mb-1">{{ pat.name }}</h5>
+                                                    <small class="text-muted">{{ pat.email }}</small>
+                                                </div>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary edit-patient-btn" data-id="{{ pat.id }}" data-name="{{ pat.name }}" data-email="{{ pat.email }}">Edit</button>
+                                                    <button class="btn btn-outline-danger delete-patient-btn" data-id="{{ pat.id }}">Delete</button>
+                                                    <button class="btn btn-outline-warning blacklist-patient-btn" data-id="{{ pat.id }}">Blacklist</button>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p class="text-muted">No patients registered yet.</p>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -146,51 +164,39 @@
     <!--
     <footer class="mt-auto"> FOOTER INFORMATION </footer>
     -->
-    <script>
-       
-    const form = document.getElementById('addDoctorForm');
 
-    if (form) {
-        form.addEventListener('submit', e => {
-            if (!form.checkValidity()){
+    <script>
+    const doctorForm = document.getElementById('addDoctorForm');
+    if (doctorForm) {
+        doctorForm.addEventListener('submit', e => {
+            if (!doctorForm.checkValidity()) {
                 e.preventDefault();
                 e.stopPropagation();
             }
-            form.classList.add('was-validated');
-        })
+            doctorForm.classList.add('was-validated');
+        });
     }
 
-    </script>
-
-    <script>
-    // Helper to reset the add doctor form to 'Add' mode
     const resetForm = () => {
         const form = document.getElementById('addDoctorForm');
         form.action = '/add-doctor';
         form.querySelector('button[type=submit]').textContent = 'Add Doctor';
-        // remove doctor_id hidden input if present
         const hid = document.getElementById('doctor_id');
         if (hid) hid.remove();
-        // clear fields
         form.reset();
         form.classList.remove('was-validated');
-        // remove cancel button if present
         const cancel = document.getElementById('cancelEdit');
         if (cancel) cancel.remove();
     }
 
-    // Wire up edit buttons
     document.querySelectorAll('.edit-doctor-btn').forEach(btn => {
         btn.addEventListener('click', e => {
             const id = btn.dataset.id;
             const name = btn.dataset.name || '';
             const spec = btn.dataset.spec || '';
             const email = btn.dataset.email || '';
-
             const form = document.getElementById('addDoctorForm');
             form.action = '/edit-doctor';
-
-            // set or create hidden doctor_id field
             let hid = document.getElementById('doctor_id');
             if (!hid) {
                 hid = document.createElement('input');
@@ -200,16 +206,11 @@
                 form.appendChild(hid);
             }
             hid.value = id;
-
             form.querySelector('#fname').value = name;
             form.querySelector('#spec').value = spec;
             form.querySelector('#email').value = email;
-            // do not prefill password for security
             form.querySelector('#password').value = '';
-
             form.querySelector('button[type=submit]').textContent = 'Update Doctor';
-
-            // add a cancel button if not present
             if (!document.getElementById('cancelEdit')) {
                 const cancel = document.createElement('button');
                 cancel.type = 'button';
@@ -220,10 +221,8 @@
                 form.appendChild(cancel);
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        })
-    })
-
-    // Wire up delete buttons
+        });
+    });
     document.querySelectorAll('.delete-doctor-btn').forEach(btn => {
         btn.addEventListener('click', e => {
             if (!confirm('Delete this doctor? This will also remove the associated user account.')) return;
@@ -234,10 +233,8 @@
             const hid = document.createElement('input'); hid.type = 'hidden'; hid.name = 'doctor_id'; hid.value = id; form.appendChild(hid);
             document.body.appendChild(form);
             form.submit();
-        })
-    })
-
-    // Wire up blacklist buttons
+        });
+    });
     document.querySelectorAll('.blacklist-doctor-btn').forEach(btn => {
         btn.addEventListener('click', e => {
             if (!confirm('Blacklist this doctor (disable their account)?')) return;
@@ -248,8 +245,52 @@
             const hid = document.createElement('input'); hid.type = 'hidden'; hid.name = 'doctor_id'; hid.value = id; form.appendChild(hid);
             document.body.appendChild(form);
             form.submit();
-        })
-    })
+        });
+    });
+
+    document.querySelectorAll('.edit-patient-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            const id = btn.dataset.id;
+            const name = btn.dataset.name || '';
+            const email = btn.dataset.email || '';
+            const newName = prompt('Edit patient name:', name);
+            if (newName === null) return;
+            const newEmail = prompt('Edit patient email:', email);
+            if (newEmail === null) return;
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/edit-patient';
+            const hid = document.createElement('input'); hid.type = 'hidden'; hid.name = 'patient_id'; hid.value = id; form.appendChild(hid);
+            const n = document.createElement('input'); n.type = 'hidden'; n.name = 'name'; n.value = newName; form.appendChild(n);
+            const em = document.createElement('input'); em.type = 'hidden'; em.name = 'email'; em.value = newEmail; form.appendChild(em);
+            document.body.appendChild(form);
+            form.submit();
+        });
+    });
+    document.querySelectorAll('.delete-patient-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            if (!confirm('Delete this patient? This will also remove the associated user account.')) return;
+            const id = btn.dataset.id;
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/delete-patient';
+            const hid = document.createElement('input'); hid.type = 'hidden'; hid.name = 'patient_id'; hid.value = id; form.appendChild(hid);
+            document.body.appendChild(form);
+            form.submit();
+        });
+    });
+    document.querySelectorAll('.blacklist-patient-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            if (!confirm('Blacklist this patient (disable their account)?')) return;
+            const id = btn.dataset.id;
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/blacklist-patient';
+            const hid = document.createElement('input'); hid.type = 'hidden'; hid.name = 'patient_id'; hid.value = id; form.appendChild(hid);
+            document.body.appendChild(form);
+            form.submit();
+        });
+    });
     </script>
 
 </body>
