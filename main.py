@@ -3,12 +3,12 @@ from flask import Flask
 from application import config
 from application.config import LocalDevelopmentConfig
 from application.database import db
+from application.models import seed_departments
 
 from flask_security import Security, SQLAlchemyUserDatastore, auth_required, hash_password
 from application.models import User, Role
 
 from flask_restful import Resource, Api
-
 
 app = None
 api = None
@@ -50,6 +50,8 @@ def create_app():
             admin_user = User(email='admin@admin.com', password=hash_password(os.getenv('Admin')), active=True, fs_uniquifier='')
             db.session.add(admin_user)
             db.session.commit()
+
+        seed_departments()    
 
 
     app.app_context().push()

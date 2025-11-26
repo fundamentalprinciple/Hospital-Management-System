@@ -54,7 +54,69 @@
         <div class="container mt-4">
             <h1>Doctor Dashboard</h1>
             <p>Welcome, Dr. {{ doctor_name }}!</p>
-        </div>       
+
+            <!-- Upcoming Appointments Widget -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">Upcoming Appointments</div>
+                <div class="card-body">
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sr no.</th>
+                                    <th>Patient name</th>
+                                    <th>Patient history</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appt in appointments %}
+                                <tr>
+                                    <td>{{ appt.id }}</td>
+                                    <td>{{ appt.patient.name }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-outline-secondary btn-sm" disabled>Update</a>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-outline-success btn-sm me-2" disabled>Mark as Complete</button>
+                                        <button class="btn btn-outline-danger btn-sm" disabled>Cancel</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No upcoming appointments.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Assigned Patients Widget -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">Assigned Patients</div>
+                <div class="card-body">
+                    {% if patients %}
+                        <ul class="list-group list-group-flush">
+                        {% for pat in patients %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ pat.name }} <span class="text-muted">({{ pat.email }})</span></span>
+                                <a href="/patient_history/{{ pat.id }}" class="btn btn-outline-primary btn-sm">View Details</a>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">No assigned patients.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Provide Availability Button -->
+            <div class="d-flex justify-content-end mb-4">
+                <a href="/doctor_schedule" class="btn btn-success">Provide Availability</a>
+            </div>
+        </div>
     </main>
 
     <!--

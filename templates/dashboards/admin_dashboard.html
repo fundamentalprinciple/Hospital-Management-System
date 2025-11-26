@@ -72,8 +72,13 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="spec" class="form-label">Specialization</label>
-                                    <input type="text" class="form-control" id="spec" name="spec">
+                                    <label for="department_id" class="form-label">Department</label>
+                                    <select class="form-select" id="department_id" name="department_id" required>
+                                        <option value="" disabled selected>Select Department</option>
+                                        {% for dept in departments %}
+                                            <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
 
                                 <div class="mb-3">
@@ -102,11 +107,11 @@
                                     <div class="list-group-item mb-2 shadow-sm d-flex align-items-center justify-content-between" data-doctor-id="{{ doc.id }}">
                                         <div>
                                             <h5 class="mb-1">{{ doc.name }}</h5>
-                                            <p class="mb-1 text-muted">{{ doc.specialization or 'General' }}</p>
+                                            <p class="mb-1 text-muted">{{ doc.department.name if doc.department else 'General' }}</p>
                                             <small class="text-muted">{{ doc.email }}</small>
                                         </div>
                                         <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-primary edit-doctor-btn" data-id="{{ doc.id }}" data-name="{{ doc.name }}" data-spec="{{ doc.specialization }}" data-email="{{ doc.email }}">Edit</button>
+                                            <button class="btn btn-outline-primary edit-doctor-btn" data-id="{{ doc.id }}" data-name="{{ doc.name }}" data-deptid="{{ doc.department_id }}" data-email="{{ doc.email }}">Edit</button>
                                             <button class="btn btn-outline-danger delete-doctor-btn" data-id="{{ doc.id }}">Delete</button>
                                             <button class="btn btn-outline-warning blacklist-doctor-btn" data-id="{{ doc.id }}">Blacklist</button>
                                         </div>
@@ -124,7 +129,40 @@
                             <div class="card shadow-sm">
                                 <div class="card-header">Appointments</div>
                                 <div class="card-body">
-                                    <p class="text-muted mb-0">Appointments overview will appear here.</p>
+                                    {% if appointments and appointments|length > 0 %}
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Sr No.</th>
+                                                    <th>Patient</th>
+                                                    <th>Doctor</th>
+                                                    <th>Department</th>
+                                                    <th>Date</th>
+                                                    <th>Shift</th>
+                                                    <th>Patient History</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for appt in appointments %}
+                                                <tr>
+                                                    <td>{{ appt.id }}</td>
+                                                    <td>{{ appt.patient_name }}</td>
+                                                    <td>{{ appt.doctor_name }}</td>
+                                                    <td>{{ appt.department }}</td>
+                                                    <td>{{ appt.date.strftime('%Y-%m-%d') if appt.date else '' }}</td>
+                                                    <td>{{ appt.shift|capitalize }}</td>
+                                                    <td>
+                                                        <a href="#" class="btn btn-sm btn-outline-info">View</a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                        <p class="text-muted mb-0">No appointments found.</p>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
