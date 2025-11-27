@@ -3,11 +3,13 @@ from flask_security import UserMixin, RoleMixin
 from uuid import uuid4
 from .database import db
 
+
 roles_users = db.Table(
         'roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id'), primary_key=True),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
     )
+
 
 class User(db.Model, UserMixin):
     __tablename__='user'
@@ -20,6 +22,7 @@ class User(db.Model, UserMixin):
 
     fs_uniquifier = db.Column(db.String, unique=True, nullable=False, default=lambda: uuid4().hex)
 
+
 class Role(db.Model, RoleMixin):
     __tablename__='role'
     id=db.Column(db.Integer, primary_key=True)
@@ -27,7 +30,6 @@ class Role(db.Model, RoleMixin):
     description = db.Column(db.String(255))
 
 
-# Departments model
 class Department(db.Model):
     __tablename__ = 'department'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -36,10 +38,10 @@ class Department(db.Model):
     doctors_registered = db.Column(db.Integer, default=0)
     extra_info = db.Column(db.Text)
 
-    # Relationship to Doctor
     doctors = db.relationship('Doctor', backref='department', lazy=True)
 
 
+#harcoded departments
 def seed_departments():
     departments = [
         Department(id=1, name="Cardiology", description="Specializes in diagnosing and treating heart and blood-vessel disorders, including heart disease, arrhythmias, hypertension, and heart failure."),
@@ -59,7 +61,7 @@ def seed_departments():
             db.session.add(dept)
     db.session.commit()
 
-# Updated Doctor model with department_id foreign key
+
 class Doctor(db.Model):
     __tablename__='doctor'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -73,6 +75,7 @@ class Patient(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
+
 
 class Appointment(db.Model):
     __tablename__ = 'appointment'
@@ -90,7 +93,6 @@ class Appointment(db.Model):
     doctor = db.relationship('Doctor', backref=db.backref('appointments', lazy=True))    
 
 
-# PatientHistory model
 class PatientHistory(db.Model):
     __tablename__ = 'patient_history'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -103,7 +105,7 @@ class PatientHistory(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     patient = db.relationship('Patient', backref=db.backref('history', lazy=True))
 
-# Availability model
+
 class Availability(db.Model):
     __tablename__ = 'availability'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)

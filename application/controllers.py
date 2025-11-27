@@ -14,7 +14,6 @@ from flask import request
 
 
 def _get_doctors_info():
-    """Return a list of (Doctor, active_bool) tuples for all doctors."""
     docs = Doctor.query.order_by(Doctor.name).all()
     info = []
     for d in docs:
@@ -23,16 +22,6 @@ def _get_doctors_info():
         info.append((d, active))
     return info
 
-
-def _get_doctors_info():
-    """Return a list of (Doctor, active_bool) tuples for all doctors."""
-    docs = Doctor.query.order_by(Doctor.name).all()
-    info = []
-    for d in docs:
-        user = User.query.filter_by(email=d.email).first()
-        active = bool(user.active) if user and user.active is not None else False
-        info.append((d, active))
-    return info
 
 @app.route("/", methods=['GET','POST'])
 @login_required
@@ -42,14 +31,14 @@ def dashboard():
         doctors = Doctor.query.order_by(Doctor.name).all()
         patients = Patient.query.order_by(Patient.name).all()
         departments = Department.query.order_by(Department.name).all()
-        # Get all appointments and sort: date asc, shift (morning first), id asc
+
         appointments = Appointment.query.all()
         def appt_sort_key(appt):
-            # earlier date first, then morning before evening, then id
+
             shift_priority = 0 if (hasattr(appt, 'shift') and appt.shift and appt.shift.lower() == 'morning') else 1
             return (appt.date, shift_priority, appt.id)
         sorted_appointments = sorted(appointments, key=appt_sort_key)
-        # Attach doctor and department info for each appointment
+
         appt_list = []
         for appt in sorted_appointments:
             doctor = Doctor.query.get(appt.doctor_id)
@@ -65,11 +54,13 @@ def dashboard():
                 'shift': appt.shift
             })
         return render_template('dashboards/admin_dashboard.html', doctors=doctors, patients=patients, departments=departments, appointments=appt_list)
+    
     # Doctor Dashboard
     elif any(role.name == 'doctor' for role in current_user.roles):
         doctor = Doctor.query.filter_by(email=current_user.email).first()
         doctor_name = doctor.name if doctor and doctor.name else current_user.email
         return render_template('dashboards/doctor_dashboard.html', doctor_name=doctor_name)
+    
     # Patient Dashboard
     else:
         patient = Patient.query.filter_by(email=current_user.email).first()
@@ -95,6 +86,7 @@ def dashboard():
             departments=departments,
             appointments=appt_list
         )
+
 
 @app.route('/edit-patient', methods=['POST'])
 @login_required
@@ -122,6 +114,7 @@ def edit_patient():
     patients = Patient.query.order_by(Patient.name).all()
     return render_template('dashboards/admin_dashboard.html', doctors=doctors, patients=patients)
 
+
 @app.route('/delete-patient', methods=['POST'])
 @login_required
 def delete_patient():
@@ -143,6 +136,7 @@ def delete_patient():
     patients = Patient.query.order_by(Patient.name).all()
     return render_template('dashboards/admin_dashboard.html', doctors=doctors, patients=patients)
 
+
 @app.route("/doctor-dashboard", methods=['GET'])
 @login_required
 def doctor_dashboard():
@@ -152,13 +146,13 @@ def doctor_dashboard():
     patients = []
     if doctor:
         from application.models import Appointment, Patient, Department
-        # Get all appointments for this doctor, sorted by date, shift, id
+
         all_appts = Appointment.query.filter_by(doctor_id=doctor.id).all()
         def appt_sort_key(appt):
             shift_priority = 0 if (hasattr(appt, 'shift') and appt.shift and appt.shift.lower() == 'morning') else 1
             return (appt.date, shift_priority, appt.id)
         sorted_appts = sorted(all_appts, key=appt_sort_key)
-        # Only show future appointments
+
         from datetime import date as dtdate
         today = dtdate.today()
         appointments = []
@@ -174,9 +168,10 @@ def doctor_dashboard():
                     'date': appt.date,
                     'shift': appt.shift
                 })
-        # Get unique patients assigned to this doctor
+
         patients = list({Patient.query.get(a.patient_id) for a in all_appts})
     return render_template('dashboards/doctor_dashboard.html', doctor_name=doctor_name, appointments=appointments, patients=patients)
+
 
 @app.route("/patient-dashboard", methods=['GET'])
 @login_required
@@ -185,9 +180,9 @@ def patient_dashboard():
     patient = Patient.query.filter_by(email=current_user.email).first()
     patient_name = patient.name if patient and patient.name else current_user.email
     departments = Department.query.order_by(Department.name).all()
-    # Get all upcoming appointments for this patient
+
     appointments = Appointment.query.filter_by(patient_id=patient.id).order_by(Appointment.date).all() if patient else []
-    # Attach doctor and department info for each appointment
+
     appt_list = []
     for appt in appointments:
         doctor = Doctor.query.get(appt.doctor_id)
@@ -225,7 +220,7 @@ def add_doctor():
     db.session.commit()
     new_doctor = Doctor(name=name, email=email, department_id=department_id)
     db.session.add(new_doctor)
-    # Increment doctors_registered for the department
+
     department = Department.query.get(department_id)
     if department:
         department.doctors_registered = (department.doctors_registered or 0) + 1
@@ -283,7 +278,6 @@ def delete_doctor():
     if not doctor:
         return "Doctor not found", 404
 
-    # Decrement doctors_registered for the department
     if doctor.department_id:
         department = Department.query.get(doctor.department_id)
         if department and department.doctors_registered:
@@ -342,26 +336,6 @@ def blacklist_patient():
     patients = Patient.query.order_by(Patient.name).all()
     return render_template('dashboards/admin_dashboard.html', doctors=doctors, patients=patients)
 
-@app.route("/help")
-def help():
-    return render_template('pages.html', page_name="Help", main="WILL FILL POST DEVELOPMENT", help_active="active")
-
-@app.route("/about")
-def about():
-    return render_template('pages.html', page_name="about", main="A PROJECT WEB APP FOR HOSPITAL MANAGEMENT, IIT MADRAS", about_active="active")
-
-
-@app.route("/admin")
-@login_required
-def admin():
-    return render_template('admin.html')
-
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
 
 @app.route('/after-login')
 @login_required
@@ -384,7 +358,7 @@ def department_details(dept_id):
     doctors = department.doctors if department else []
     return render_template('dashboards/department.html', department=department, doctors=doctors)
 
-# --- Patient History Route for Doctor ---
+
 @app.route('/patient_history/<int:patient_id>', methods=['GET'])
 @login_required
 def patient_history(patient_id):
@@ -393,7 +367,7 @@ def patient_history(patient_id):
     history = PatientHistory.query.filter_by(patient_id=patient_id).order_by(PatientHistory.visit_no).all()
     return render_template('dashboards/patient_history.html', patient=patient, history=history)
 
-# --- Doctor Schedule Route ---
+
 @app.route('/doctor_schedule', methods=['GET', 'POST'])
 @login_required
 def doctor_schedule():
@@ -411,16 +385,16 @@ def doctor_schedule():
             if not avail:
                 avail = Availability(doctor_id=doctor.id, date=slot_date_obj)
                 db.session.add(avail)
-            # Toggle logic: if already set, unset; if not, set
+
             if slot_type == 'morning':
                 avail.morning = not avail.morning
             elif slot_type == 'evening':
                 avail.evening = not avail.evening
-            # If both are now False, remove the row
+
             if not avail.morning and not avail.evening:
                 db.session.delete(avail)
             db.session.commit()
-    # Prepare next 7 days and availability info
+
     today = date.today()
     days = []
     avail_lookup = {}
@@ -437,7 +411,7 @@ def doctor_schedule():
         })
     return render_template('dashboards/doctor_schedule.html', days=days)
 
-# --- Doctor Schedule for Patient Booking ---
+
 @app.route('/schedule', methods=['GET', 'POST'])
 @login_required
 def schedule():
@@ -500,7 +474,6 @@ def schedule():
     )
 
 
-# Cancel appointment route
 @app.route('/cancel-appointment', methods=['POST'])
 @login_required
 def cancel_appointment():
@@ -530,3 +503,18 @@ def _on_user_registered(sender, user, form_data=None, **extra):
             db.session.commit()
     except Exception:
         db.session.rollback()
+
+
+@app.route("/help")
+def help():
+    return render_template('pages.html', page_name="Help", main="WILL FILL POST DEVELOPMENT", help_active="active")
+
+
+@app.route("/about")
+def about():
+    return render_template('pages.html', page_name="about", main="A PROJECT WEB APP FOR HOSPITAL MANAGEMENT, IIT MADRAS", about_active="active")
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404

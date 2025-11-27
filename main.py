@@ -32,11 +32,6 @@ def create_app():
     
     with app.app_context():
         db.create_all()
-    '''
-        if not security.datastore.find_user(email="test@me.com"):
-            security.datastore.create_user(email="test@me.com", password=hash_password("password"))
-            db.session.commit()
-    '''
 
     with app.app_context():
         roles = ['admin','doctor','patient']
