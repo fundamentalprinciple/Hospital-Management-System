@@ -31,9 +31,6 @@
                 <li class="nav-item">
                     <a href="login" id="login_nav" class="nav-link {{ log_active }}">Login</a>
                 </li>
-                <li class="nav-item">
-                    <a href="help" id="help_nav" class="nav-link {{ help_active }}">Help</a>
-                </li>
                  <li class="nav-item">
                      <a href="about" id="about_nav" class="nav-link {{ about_active }}">About</a>
                 </li>
@@ -58,41 +55,41 @@
 
                 <form  method="POST">
 
-			{{ login_user_form.hidden_tag() }}	
-
+                   {{ login_user_form.hidden_tag() }}
                     <fieldset>
                         <legend>Login</legend>
 
                         <label for="email" class="form-label mt-3">Email</label>
-			<input type="email" id="email" class="form-control form-control-md mt-3" required  name="{{ login_user_form.email.name }}" value="{{ login_user_form.email.data or '' }}" />
-
+                        <input type="email" id="email" class="form-control form-control-md mt-3 {% if login_user_form.email.errors %}is-invalid{% endif %}" required  name="{{ login_user_form.email.name }}" value="{{ login_user_form.email.data or '' }}" />
+                        {% if login_user_form.email.errors %}
+                        <div class="invalid-feedback">
+                            {{ login_user_form.email.errors[0] }}
+                        </div>
+                        {% endif %}
 
                         <label for="password" class="form-label mt-3">Password</label>
-			<input type="password" id="password" class="form-control form-control-md mt-3" required name="{{ login_user_form.password.name }}" />
-
+                        <input type="password" id="password" class="form-control form-control-md mt-3 {% if login_user_form.password.errors %}is-invalid{% endif %}" required name="{{ login_user_form.password.name }}" />
+                        {% if login_user_form.password.errors %}
+                        <div class="invalid-feedback">
+                            {{ login_user_form.password.errors[0] }}
+                        </div>
+                        {% endif %}
 
                         <button class="mt-3" type="submit">Submit</button>
 
                         <p class="mt-3">If you don't have an account, <a href="register"> register </a></p>
-
                     </fieldset>
 
                 </form>
 
             </div>
             <div class="col">
-            <!--
-            <img src="../../static/right_login_img.svg">
-            -->
             </div>
         </div>
     </div>
 
     </main>
 
-    <!--
-    <footer class="mt-auto"> FOOTER INFORMATION </footer>
-    -->
     <script>
     
         const form = document.querySelector("form");

@@ -36,9 +36,6 @@
 		{% endif %}
 
                 </li>
-                <li class="nav-item">
-                    <a href="help" id="help_nav" class="nav-link {{ help_active }}">Help</a>
-                </li>
                  <li class="nav-item">
                      <a href="about" id="about_nav" class="nav-link {{ about_active }}">About</a>
                 </li>
@@ -54,9 +51,14 @@
     <main>
 
         <div class="container py-4">
-            <div class="row mb-3">
-                <div class="col-12 text-center">
-                    <h2 class="h4">Admin Dashboard</h2>
+
+            <div class="row mb-3 align-items-center">
+                <div class="col text-center d-flex justify-content-center align-items-center">
+                    <h2 class="h4 me-3 mb-0">Admin Dashboard</h2>
+                    <div class="position-relative" style="min-width:300px;">
+                        <input id="userSearchBar" type="text" class="form-control" placeholder="Search doctors or patients by name..." autocomplete="off">
+                        <div id="searchDropdown" class="dropdown-menu w-100" style="max-height:250px; overflow-y:auto;"></div>
+                    </div>
                 </div>
             </div>
 
@@ -153,7 +155,7 @@
                                                     <td>{{ appt.date.strftime('%Y-%m-%d') if appt.date else '' }}</td>
                                                     <td>{{ appt.shift|capitalize }}</td>
                                                     <td>
-                                                        <a href="#" class="btn btn-sm btn-outline-info">View</a>
+                                                        <a href="/patient_history/{{ appt.patient_id }}" class="btn btn-sm btn-outline-info">View</a>
                                                     </td>
                                                 </tr>
                                                 {% endfor %}
@@ -199,11 +201,56 @@
 
     </main>
 
-    <!--
-    <footer class="mt-auto"> FOOTER INFORMATION </footer>
-    -->
-
     <script>
+        const doctors = [
+            {% for doc in doctors %}
+            {type: 'doctor', id: {{ doc.id }}, name: `{{ doc.name|e }}`},
+            {% endfor %}
+        ];
+        const patients = [
+            {% for pat in patients %}
+            {type: 'patient', id: {{ pat.id }}, name: `{{ pat.name|e }}`},
+            {% endfor %}
+        ];
+        const allUsers = doctors.concat(patients);
+
+        const searchBar = document.getElementById('userSearchBar');
+        const dropdown = document.getElementById('searchDropdown');
+
+        searchBar.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            dropdown.innerHTML = '';
+            if (!query) {
+                dropdown.classList.remove('show');
+                return;
+            }
+            const matches = allUsers.filter(u => u.name.toLowerCase().includes(query));
+            if (matches.length === 0) {
+                dropdown.classList.remove('show');
+                return;
+            }
+            matches.forEach(u => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'dropdown-item';
+                item.textContent = `${u.name} (${u.type})`;
+                item.onclick = function() {
+                    if (u.type === 'doctor') {
+                        window.location.href = `/doctor-details/${u.id}`;
+                    } else {
+                        window.location.href = `/patient_history/${u.id}`;
+                    }
+                };
+                dropdown.appendChild(item);
+            });
+            dropdown.classList.add('show');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!searchBar.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
     const doctorForm = document.getElementById('addDoctorForm');
     if (doctorForm) {
         doctorForm.addEventListener('submit', e => {

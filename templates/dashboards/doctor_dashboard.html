@@ -36,9 +36,6 @@
 		{% endif %}
 
                 </li>
-                <li class="nav-item">
-                    <a href="help" id="help_nav" class="nav-link {{ help_active }}">Help</a>
-                </li>
                  <li class="nav-item">
                      <a href="about" id="about_nav" class="nav-link {{ about_active }}">About</a>
                 </li>
@@ -75,11 +72,21 @@
                                     <td>{{ appt.id }}</td>
                                     <td>{{ appt.patient.name }}</td>
                                     <td>
-                                        <a href="#" class="btn btn-outline-secondary btn-sm" disabled>Update</a>
+                                        <a href="/update-patient-history/{{ appt.id }}" class="btn btn-outline-info btn-sm">Update</a>
                                     </td>
                                     <td>
-                                        <button class="btn btn-outline-success btn-sm me-2" disabled>Mark as Complete</button>
-                                        <button class="btn btn-outline-danger btn-sm" disabled>Cancel</button>
+                                        {% if appt.status == 'Completed' %}
+                                            <button class="btn btn-success btn-sm" disabled>Completed</button>
+                                        {% else %}
+                                            <form method="post" action="/complete-appointment" style="display:inline;">
+                                                <input type="hidden" name="appointment_id" value="{{ appt.id }}">
+                                                <button type="submit" class="btn btn-outline-success btn-sm me-2">Mark as Complete</button>
+                                            </form>
+                                            <form method="post" action="/cancel-appointment" style="display:inline;">
+                                                <input type="hidden" name="appointment_id" value="{{ appt.id }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Cancel this appointment?');">Cancel</button>
+                                            </form>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -117,9 +124,6 @@
         </div>
     </main>
 
-    <!--
-    <footer class="mt-auto"> FOOTER INFORMATION </footer>
-    -->
     <script>
         {{ script }}    
     </script>

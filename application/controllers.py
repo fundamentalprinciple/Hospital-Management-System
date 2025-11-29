@@ -2,7 +2,7 @@ from flask import url_for, flash
 from datetime import date, timedelta
 from flask import Flask, render_template, request, redirect
 from flask import current_app as app
-from application.models import Role, User, Doctor, Patient, Department, Appointment
+from application.models import Role, User, Doctor, Patient, Department, Appointment, PatientHistory
 from application.database import db
 from .temp import *
 
@@ -59,7 +59,31 @@ def dashboard():
     elif any(role.name == 'doctor' for role in current_user.roles):
         doctor = Doctor.query.filter_by(email=current_user.email).first()
         doctor_name = doctor.name if doctor and doctor.name else current_user.email
-        return render_template('dashboards/doctor_dashboard.html', doctor_name=doctor_name)
+        appointments = []
+        patients = []
+        if doctor:
+            all_appts = Appointment.query.filter_by(doctor_id=doctor.id).all()
+            def appt_sort_key(appt):
+                shift_priority = 0 if (hasattr(appt, 'shift') and appt.shift and appt.shift.lower() == 'morning') else 1
+                return (appt.date, shift_priority, appt.id)
+            sorted_appts = sorted(all_appts, key=appt_sort_key)
+            from datetime import date as dtdate
+            today = dtdate.today()
+            for appt in sorted_appts:
+                if appt.date >= today:
+                    patient = Patient.query.get(appt.patient_id)
+                    dept = Department.query.get(doctor.department_id) if doctor else None
+                    appointments.append({
+                        'id': appt.id,
+                        'patient': patient,
+                        'doctor_name': doctor.name,
+                        'department': dept.name if dept else '',
+                        'date': appt.date,
+                        'shift': appt.shift,
+                        'status': appt.status
+                    })
+            patients = list({Patient.query.get(a.patient_id) for a in all_appts})
+        return render_template('dashboards/doctor_dashboard.html', doctor_name=doctor_name, appointments=appointments, patients=patients)
     
     # Patient Dashboard
     else:
@@ -76,7 +100,8 @@ def dashboard():
                 'doctor_name': doctor.name if doctor else '',
                 'department': dept.name if dept else '',
                 'date': appt.date,
-                'shift': appt.shift
+                'shift': appt.shift,
+                'status': appt.status
             })
         return render_template(
             'dashboards/patient_dashboard.html',
@@ -84,7 +109,8 @@ def dashboard():
             page_name="Patient Dashboard",
             script="",
             departments=departments,
-            appointments=appt_list
+            appointments=appt_list,
+            patient_id=patient.id if patient else None
         )
 
 
@@ -162,15 +188,29 @@ def doctor_dashboard():
                 dept = Department.query.get(doctor.department_id) if doctor else None
                 appointments.append({
                     'id': appt.id,
-                    'patient_name': patient.name if patient else '',
+                    'patient': patient,
                     'doctor_name': doctor.name,
                     'department': dept.name if dept else '',
                     'date': appt.date,
-                    'shift': appt.shift
+                    'shift': appt.shift,
+                    'status': appt.status
                 })
 
         patients = list({Patient.query.get(a.patient_id) for a in all_appts})
     return render_template('dashboards/doctor_dashboard.html', doctor_name=doctor_name, appointments=appointments, patients=patients)
+
+
+# Mark appointment as complete
+@app.route('/complete-appointment', methods=['POST'])
+@login_required
+def complete_appointment():
+    from application.models import Appointment
+    appt_id = request.form.get('appointment_id')
+    appt = Appointment.query.get(appt_id)
+    if appt and appt.status != 'Completed':
+        appt.status = 'Completed'
+        db.session.commit()
+    return redirect('/doctor-dashboard')
 
 
 @app.route("/patient-dashboard", methods=['GET'])
@@ -192,11 +232,13 @@ def patient_dashboard():
             'doctor_name': doctor.name if doctor else '',
             'department': dept.name if dept else '',
             'date': appt.date,
-            'shift': appt.shift
+            'shift': appt.shift,
+            'status': appt.status
         })
     return render_template(
         'dashboards/patient_dashboard.html',
         patient_name=patient_name,
+        patient_id=patient.id if patient else None,
         page_name="Patient Dashboard",
         script="",
         departments=departments,
@@ -261,7 +303,26 @@ def edit_doctor():
     doctors = Doctor.query.order_by(Doctor.name).all()
     patients = Patient.query.order_by(Patient.name).all()
     departments = Department.query.order_by(Department.name).all()
-    return render_template('dashboards/admin_dashboard.html', doctors=doctors, patients=patients, departments=departments)
+    appointments = Appointment.query.all()
+    def appt_sort_key(appt):
+        shift_priority = 0 if (hasattr(appt, 'shift') and appt.shift and appt.shift and appt.shift.lower() == 'morning') else 1
+        return (appt.date, shift_priority, appt.id)
+    sorted_appointments = sorted(appointments, key=appt_sort_key)
+    appt_list = []
+    for appt in sorted_appointments:
+        doctor = Doctor.query.get(appt.doctor_id)
+        dept = Department.query.get(doctor.department_id) if doctor else None
+        patient = Patient.query.get(appt.patient_id)
+        appt_list.append({
+            'id': appt.id,
+            'patient_name': patient.name if patient else '',
+            'patient_id': patient.id if patient else '',
+            'doctor_name': doctor.name if doctor else '',
+            'department': dept.name if dept else '',
+            'date': appt.date,
+            'shift': appt.shift
+        })
+    return render_template('dashboards/admin_dashboard.html', doctors=doctors, patients=patients, departments=departments, appointments=appt_list)
 
 
 @app.route('/delete-doctor', methods=['POST'])
@@ -362,7 +423,6 @@ def department_details(dept_id):
 @app.route('/patient_history/<int:patient_id>', methods=['GET'])
 @login_required
 def patient_history(patient_id):
-    from application.models import Patient, PatientHistory
     patient = Patient.query.get_or_404(patient_id)
     history = PatientHistory.query.filter_by(patient_id=patient_id).order_by(PatientHistory.visit_no).all()
     return render_template('dashboards/patient_history.html', patient=patient, history=history)
@@ -385,7 +445,7 @@ def doctor_schedule():
             if not avail:
                 avail = Availability(doctor_id=doctor.id, date=slot_date_obj)
                 db.session.add(avail)
-
+            #do hi slots h
             if slot_type == 'morning':
                 avail.morning = not avail.morning
             elif slot_type == 'evening':
@@ -483,7 +543,7 @@ def cancel_appointment():
     if appt:
         db.session.delete(appt)
         db.session.commit()
-    return redirect('/patient-dashboard')
+    return redirect('/')
 
 @user_registered.connect
 def _on_user_registered(sender, user, form_data=None, **extra):
@@ -505,14 +565,83 @@ def _on_user_registered(sender, user, form_data=None, **extra):
         db.session.rollback()
 
 
-@app.route("/help")
-def help():
-    return render_template('pages.html', page_name="Help", main="WILL FILL POST DEVELOPMENT", help_active="active")
+@app.route('/doctor-details/<int:doctor_id>', methods=['GET'])
+@login_required
+def doctor_details(doctor_id):
+    doctor = Doctor.query.get_or_404(doctor_id)
+    return render_template('dashboards/doctor_details.html', doctor=doctor)
+
+
+@app.route('/update-patient-history/<int:appointment_id>', methods=['GET', 'POST'])
+@login_required
+def update_patient_history(appointment_id):
+    from application.models import Appointment, PatientHistory, Patient
+    appt = Appointment.query.get_or_404(appointment_id)
+    patient = Patient.query.get(appt.patient_id)
+    if request.method == 'POST':
+        visit_no = request.form.get('visit_no')
+        visit_type = request.form.get('visit_type')
+        tests_done = request.form.get('tests_done')
+        diagnosis = request.form.get('diagnosis')
+        prescription = request.form.get('prescription')
+        medicines = request.form.get('medicines')
+        history = PatientHistory.query.filter_by(patient_id=patient.id, visit_no=visit_no).first()
+        if history:
+            history.visit_no = visit_no 
+            history.visit_type = visit_type
+            history.tests_done = tests_done
+            history.diagnosis = diagnosis
+            history.prescription = prescription
+            history.medicines = medicines
+        else:
+            history = PatientHistory(
+                visit_no=visit_no,
+                visit_type=visit_type,
+                tests_done=tests_done,
+                diagnosis=diagnosis,
+                prescription=prescription,
+                medicines=medicines,
+                patient_id=patient.id
+            )
+            db.session.add(history)
+        db.session.commit()
+        return redirect(f'/patient_history/{patient.id}')
+    else:
+        history = PatientHistory.query.filter_by(patient_id=patient.id, visit_no=appointment_id).first()
+    return render_template('dashboards/update_patient_history.html', appointment=appt, patient=patient, history=history)
+
+
+@app.route('/edit-profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    patient = Patient.query.filter_by(email=current_user.email).first()
+    if not patient:
+        return "Unauthorized", 403
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        if name:
+            patient.name = name
+        if email:
+            old_email = patient.email
+            patient.email = email
+            user = User.query.filter_by(email=old_email).first()
+            if user:
+                user.email = email
+                user.fs_uniquifier = email
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect('/patient-dashboard')
+    return render_template('edit_profile.html', patient=patient)
 
 
 @app.route("/about")
 def about():
-    return render_template('pages.html', page_name="about", main="A PROJECT WEB APP FOR HOSPITAL MANAGEMENT, IIT MADRAS", about_active="active")
+    main_text = (
+        "A project Hospital Management System WebApp for Modern Application Development - I, IIT MADRAS. Developed by " +
+        '<a href="https://www.linkedin.com/in/prince-dixit-291599377/" style="color:blue; text-decoration:underline;" target="_blank">Prince Dixit</a>.'
+    )
+    return render_template('pages.html', page_name="about", main=main_text, about_active="active")
 
 
 @app.errorhandler(404)

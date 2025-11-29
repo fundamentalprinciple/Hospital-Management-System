@@ -36,9 +36,6 @@
 		{% endif %}
 
                 </li>
-                <li class="nav-item">
-                    <a href="help" id="help_nav" class="nav-link {{ help_active }}">Help</a>
-                </li>
                  <li class="nav-item">
                      <a href="about" id="about_nav" class="nav-link {{ about_active }}">About</a>
                 </li>
@@ -52,7 +49,13 @@
 
     <main>
         <div class="container mt-4">
-            <h1>Patient Dashboard</h1>
+                        <div class="d-flex justify-content-between align-items-center">
+                                <h1>Patient Dashboard</h1>
+                                <div>
+                                    <a href="/edit-profile" class="btn btn-outline-primary btn-sm me-2">Edit Profile</a>
+                                    <a href="/patient_history/{{ patient_id }}" class="btn btn-outline-info btn-sm">History</a>
+                                </div>
+                        </div>
             <p>Welcome, {{ patient_name }}!</p>
 
             <div class="card shadow-sm mt-4">
@@ -101,10 +104,14 @@
                                             <td>{{ appt.date.strftime('%Y-%m-%d') if appt.date else '' }}</td>
                                             <td>{{ appt.shift|capitalize }}</td>
                                             <td>
-                                                <form method="post" action="/cancel-appointment" style="display:inline;">
-                                                    <input type="hidden" name="appointment_id" value="{{ appt.id }}">
-                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this appointment?');">Cancel</button>
-                                                </form>
+                                                {% if appt.status == 'Completed' %}
+                                                    <button class="btn btn-success btn-sm" disabled>Completed</button>
+                                                {% else %}
+                                                    <form method="post" action="/cancel-appointment" style="display:inline;">
+                                                        <input type="hidden" name="appointment_id" value="{{ appt.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this appointment?');">Cancel</button>
+                                                    </form>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -121,9 +128,6 @@
         </div>
     </main>
 
-    <!--
-    <footer class="mt-auto"> FOOTER INFORMATION </footer>
-    -->
     <script>
         {{ script }}    
     </script>

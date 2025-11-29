@@ -27,6 +27,8 @@ def create_app():
     db.init_app(app)        
 
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+    from application.forms import ExtendedRegisterForm
+    app.config['SECURITY_REGISTER_FORM'] = ExtendedRegisterForm
     security = Security(app, user_datastore)
 
     

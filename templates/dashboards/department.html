@@ -36,7 +36,7 @@
                                         <span>{{ doc.name }}</span>
                                         <span>
                                             <a href="/schedule?doctor_id={{ doc.id }}" class="btn btn-outline-success btn-sm me-2">Check Availability</a>
-                                            <button class="btn btn-outline-primary btn-sm" disabled>View Details</button>
+                                            <a href="/doctor-details/{{ doc.id }}" class="btn btn-outline-primary btn-sm">View Details</a>
                                         </span>
                                     </li>
                                     {% endfor %}

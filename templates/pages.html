@@ -36,9 +36,6 @@
 		{% endif %}
 
                 </li>
-                <li class="nav-item">
-                    <a href="help" id="help_nav" class="nav-link {{ help_active }}">Help</a>
-                </li>
                  <li class="nav-item">
                      <a href="about" id="about_nav" class="nav-link {{ about_active }}">About</a>
                 </li>
@@ -51,15 +48,17 @@
     </header>
 
     <main>
-        {{ main | safe }}
-
-	{{ user }}
-
+        {% block main %}
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col"></div>
+                <div class="col">
+                    {{ main | safe }}
+                </div>    
+                <div class="col"></div>    
+            </div>    
+        {% endblock %}
     </main>
-
-    <!--
-    <footer class="mt-auto"> FOOTER INFORMATION </footer>
-    -->
     <script>
         {{ script }}    
     </script>
