@@ -1,4 +1,4 @@
-If you're unfamiliar with python development, follow these step to run my webapp:
+If you're unfamiliar with python development, follow these steps to run my webapp:
 1) Clone the repo
 2) Make a python3 virtual environment (run this command for ubuntu: python3 -m venv [name of the venv])
 3) Activate the venv (run: source [name of the venv]/bin/activate)
